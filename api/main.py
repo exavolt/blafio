@@ -11,19 +11,19 @@ import logging
 
 import round_
 
-import mongoengine
+#import mongoengine
 import tornado.web
 import tornado.ioloop
 
 
 def main():
     #mongoengine.connect('blafio')
-    mongoengine.connect('blafio-dev', 
-        host='flame.mongohq.com', 
-        port=27100, 
-        username='exavolt', 
-        password='000000'
-        )
+    # mongoengine.connect('blafio-dev', 
+    #     host='flame.mongohq.com', 
+    #     port=27100, 
+    #     username='exavolt', 
+    #     password='000000'
+    #     )
     settings = dict()
     application = tornado.web.Application([
         (r"/1.0/round/([a-z]+)\.json", round_.ActionHandler),
