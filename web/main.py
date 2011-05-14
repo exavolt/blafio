@@ -26,13 +26,13 @@ def main():
         password='000000'
         )
     settings = dict(
-        static_path=os.path.join(self.base_path, "static"),
+        static_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "static"),
         )
     application = tornado.web.Application([
         (r"/", index.ViewHandler),
         (r"/stream", stream.ViewHandler),
         ], **settings)
-    application.listen(11003)
+    application.listen(11001)
     tornado.ioloop.IOLoop.instance().start()
 
 

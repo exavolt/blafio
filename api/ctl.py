@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import sys
+import os.path
 import daemon
 
 class Daemon(daemon.Daemon):
@@ -14,7 +16,6 @@ if __name__ == "__main__":
         stdout='/tmp/blafio-api.out',
         stderr='/tmp/blafio-api.err'
         )
-    d.base_path = os.path.dirname(os.path.abspath(__file__))
     if len(sys.argv) == 2:
         if 'start' == sys.argv[1]:
             d.start()

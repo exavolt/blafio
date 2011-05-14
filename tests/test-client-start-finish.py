@@ -13,8 +13,8 @@ except:
     import simplejson as json
 
 
-#API_BASE_URL = 'http://example.com:11002/1.0/'
-API_BASE_URL = 'http://api.beta.blafio.com/1.0/'
+API_BASE_URL = 'http://example.com:11002/1.0/'
+#API_BASE_URL = 'http://api.beta.blafio.com/1.0/'
 
 def print_usage():
     print "usage: %s [round name]" % sys.argv[0]
