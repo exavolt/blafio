@@ -1,0 +1,6 @@
+
+* Config (or simulator) for CDN.
+
+* Note that the server should has its own timer.
+* User preference (profile) and contextual profile.
+
