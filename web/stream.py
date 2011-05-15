@@ -24,9 +24,9 @@ class ViewHandler(base.RequestHandler):
     def get(self):
         #TODO: Different template for each action type
         #TODO: i18n-L10n
-        tpl = string.Template('<li>'
+        tpl = string.Template('<li class="round">'
             '<span class="actor"><a href="${actor_url}">${actor_name}</a></span> '
-            '${action}ed working on <span class="task">\'${task_name}\'</span> '
+            '${action}ed working on <span class="name">\'${round_name}\'</span> '
             '${timestamp}</li>'
             )
         def _round_activity_find_cb(resp, error):
@@ -44,13 +44,15 @@ jQuery(document).ready(function() {
 ''')
             self.write('<h2>Stream</h2>\n')
             self.write('<ul>')
+            #rd_set = set()
             for rd_act in resp:
+                #rd_set.add(rd_act['round'].id)
                 #TODO: HTML escape
                 self.write(tpl.substitute(
                     actor_url="",
                     actor_name='someone',
                     action=rd_act['action'],
-                    task_name=str(rd_act['round']),
+                    round_name=str(rd_act['round']),
                     timestamp=datetime_timeago_abbr(rd_act['timestamp'])
                     ))
             self.write('</ul>\n')

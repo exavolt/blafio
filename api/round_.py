@@ -10,6 +10,7 @@ import logging
 #TODO: should be 'blafio.core.round_'
 #import core.round_
 
+import bson.dbref
 import pymongo.objectid
 import tornado.web
 import base
@@ -57,7 +58,7 @@ class ActionHandler(base.RequestHandler):
                     self.finish()
                     return
                 def _activity_find_cb(resp, error):
-                    if errror:
+                    if error:
                         logging.error("Round activity find error: " + str(error))
                         self.respond_json(500, dict(
                             message="Internal server error"
@@ -84,7 +85,7 @@ class ActionHandler(base.RequestHandler):
                     callback=_activity_find_cb)
             self.db.RoundActivity.insert(dict(
                 _id=rd_act_id,
-                round=rd_data.get('_id'),
+                round=bson.dbref.DBRef('Round', rd_data.get('_id')),
                 action=action,
                 timestamp=datetime.utcnow()
                 ), callback=_activity_insert_cb)
