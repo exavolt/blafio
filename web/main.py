@@ -12,19 +12,11 @@ import logging
 import index
 import stream
 
-import mongoengine
 import tornado.web
 import tornado.ioloop
 
 
 def main():
-    #mongoengine.connect('blafio')
-    mongoengine.connect('blafio-dev', 
-        host='flame.mongohq.com', 
-        port=27100, 
-        username='exavolt', 
-        password='000000'
-        )
     settings = dict(
         static_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "static"),
         )
