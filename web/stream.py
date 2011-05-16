@@ -21,7 +21,7 @@ class ViewHandler(tornado.web.RequestHandler):
         #TODO: i18n-L10n
         tpl = string.Template('<li>'
             '<span class="actor"><a href="${actor_url}">${actor_name}</a></span> '
-            '${action}ed working on <span class="task">\'${task_name}\'</span> '
+            '${action}ed working on <span class="task">\'${round_name}\'</span> '
             '${timestamp}</li>'
             )
         self.write('''\
@@ -33,15 +33,15 @@ jQuery(document).ready(function() {
 });
 </script>
 ''')
-        self.write('<h2>Stream</h2>\n')
+        self.write('<h2>Global Stream</h2>\n')
         self.write('<ul>')
         for act in core.round_.RoundActivity.objects.order_by('-timestamp'):
             #TODO: HTML escape
             self.write(tpl.substitute(
                 actor_url="",
-                actor_name='someone',
+                actor_name=act.actor.name,
                 action=act.action,
-                task_name=act.round_.name,
+                round_name=act.round_.name,
                 timestamp=datetime_timeago_abbr(act.timestamp)
                 ))
         self.write('</ul>\n')

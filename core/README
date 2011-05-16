@@ -1,0 +1,12 @@
+
+
+Note about prep_dump details
+----------------------------
+
+* 1 - Minimum details. Usually contains only ID and the display name or text.
+      This is for embedding information.
+* 2 - Moderate details. Contains all information but deeper details are 
+      briefly embedded. This is for listing.
+* 3 - Full details. Contains all information and includes deeper details 
+      about referenced objects. This is for single view.
+
