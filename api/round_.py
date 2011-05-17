@@ -17,20 +17,10 @@ class Handler(base.RequestHandler):
             raise base.HTTPError(404, "Round not found")
         #TODO: Check access
         self.send_json(200, rd_ref.prep_dump(details=3))
-
-
-class ActivityHandler(base.RequestHandler):
-    
-    @base.oauth_method
-    def get(self, act_id):
-        rd_act = core.round_.RoundActivity.objects(id=act_id).first()
-        if not rd_act:
-            raise base.HTTPError(404, "Round activity not found")
-        #TODO: Check access
-        self.send_json(200, rd_act.prep_dump(details=3))
     
     @base.oauth_method
     def post(self, action):
+        #TODO: add optional parameter: duration
         #HACK-begin
         app = None
         usr = None
@@ -69,5 +59,16 @@ class ActivityHandler(base.RequestHandler):
             )
         rd_act.save()
         self.send_json(201, rd_act.prep_dump(details=3))
+
+
+class ActivityHandler(base.RequestHandler):
+    
+    @base.oauth_method
+    def get(self, act_id):
+        rd_act = core.round_.RoundActivity.objects(id=act_id).first()
+        if not rd_act:
+            raise base.HTTPError(404, "Round activity not found")
+        #TODO: Check access
+        self.send_json(200, rd_act.prep_dump(details=3))
     
 

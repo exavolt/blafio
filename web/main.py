@@ -11,6 +11,7 @@ import logging
 
 import index
 import stream
+import user
 
 import mongoengine
 import tornado.web
@@ -31,6 +32,7 @@ def main():
     application = tornado.web.Application([
         (r"/", index.ViewHandler),
         (r"/stream", stream.ViewHandler),
+        (r"/u/([A-Za-z0-9_]+)", user.Handler),
         ], **settings)
     application.listen(11001)
     tornado.ioloop.IOLoop.instance().start()
