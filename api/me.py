@@ -6,7 +6,7 @@ import core.round_
 import base
 
 
-class Handler(base.RequestHandler):
+class StreamHandler(base.RequestHandler):
     
     @base.oauth_method
     def get(self):

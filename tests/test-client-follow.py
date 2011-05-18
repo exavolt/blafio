@@ -16,18 +16,17 @@ import config
 
 
 def print_usage():
-    print "usage: %s <round name>" % sys.argv[0]
+    print "usage: %s <target id>" % sys.argv[0]
 
 def main():
     if len(sys.argv) < 2:
         print_usage()
         return
     
-    round_name = sys.argv[1]
-    url = config.API_BASE_URL + 'round/start.json'
+    uid = sys.argv[1]
+    url = config.API_BASE_URL + 'user-' + uid + '/follow.json'
     values = dict(
-        access_token=config.ACCESS_TOKEN,
-        name=round_name
+        access_token=config.ACCESS_TOKEN
         )
     req = urllib2.Request(url, urllib.urlencode(values))
     act = None
@@ -47,26 +46,6 @@ def main():
     if not act:
         print "Something's not right"
         return
-    
-    print "Round started"
-    #print repr(act)
-    time.sleep(15) # in seconds
-    
-    url = config.API_BASE_URL + 'round/finish.json'
-    values = dict(
-        access_token=config.ACCESS_TOKEN,
-        round=act['round']['id']
-        )
-    req = urllib2.Request(url, urllib.urlencode(values))
-    try:
-        response = urllib2.urlopen(req)
-        #print response.read()
-        response.close()
-    except urllib2.HTTPError, http_err:
-        print "Non-OK response: %d" % http_err.code
-        #print http_err.read()
-        http_err.close()
-    print "Round finished"
 
 
 if __name__ == "__main__":

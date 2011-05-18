@@ -48,9 +48,10 @@ jQuery(document).ready(function() {
             else:
                 self.write('<p>Working on "%s" from %s.</p>\n' % (
                     act.round_.name, datetime_timeago_abbr(act.timestamp)))
+            self.write('<p><a href="/u/%s/follow">+ Follow</a></p>\n' % usr.name)
         self.write('<h2>Stream</h2>\n')
         self.write('<ul>')
-        for act in core.round_.RoundActivity.objects(actor=usr).order_by('-timestamp'):
+        for act in core.round_.RoundActivity.objects(actor=usr).order_by('-timestamp')[:20]:#.all():
             #TODO: HTML escape
             self.write(tpl.substitute(
                 actor_url="/u/" + act.actor.name,

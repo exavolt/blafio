@@ -1,0 +1,6 @@
+A dummy message queue system.
+
+A real thing should aware that there will be more than one 
+servers and should automatically queue to the least loaded node.
+
+Two event classes: item publish status, subscription status.

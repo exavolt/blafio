@@ -35,7 +35,7 @@ jQuery(document).ready(function() {
 ''')
         self.write('<h1>Global Stream</h1>\n')
         self.write('<ul>')
-        for act in core.round_.RoundActivity.objects.order_by('-timestamp'):
+        for act in core.round_.RoundActivity.objects.order_by('-timestamp')[:20]:#.all():
             #TODO: HTML escape
             self.write(tpl.substitute(
                 actor_url="/u/" + act.actor.name,

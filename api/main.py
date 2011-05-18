@@ -9,6 +9,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import logging
 
+import me
 import stream
 import round_
 import user
@@ -28,11 +29,13 @@ def main():
         password='000000'
         )
     handlers = [
+        (r"/1.0/home/stream.json", me.StreamHandler),
         (r"/1.0/stream.json", stream.Handler),
         (r"/1.0/round/(start|finish|reset|interrupt|resume).json", round_.Handler),
         (r"/1.0/round-([a-z0-9]+).json", round_.Handler),
         (r"/1.0/round_activity-([a-z0-9]+).json", round_.ActivityHandler),
         (r"/1.0/user-([a-z0-9]+)/stream.json", user.StreamHandler),
+        (r"/1.0/user-([a-z0-9]+)/(follow|unfollow).json", user.SubscriptionHandler),
         (r"/1.0/user-([a-z0-9]+).json", user.Handler),
         (r"/1.0/__admin_hore/user.json", admin.UserHandler),
         (r"/1.0/__admin_hore/app.json", admin.AppHandler),

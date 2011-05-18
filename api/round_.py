@@ -4,6 +4,7 @@ from datetime import datetime
 
 #TODO: should be 'blafio.core.round_'
 import core.round_
+import mq
 
 import base
 
@@ -58,6 +59,7 @@ class Handler(base.RequestHandler):
             app=app
             )
         rd_act.save()
+        mq.publish(usr, rd_act)
         self.send_json(201, rd_act.prep_dump(details=3))
 
 
