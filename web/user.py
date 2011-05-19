@@ -26,7 +26,7 @@ class Handler(tornado.web.RequestHandler):
         #TODO: i18n-L10n
         tpl = string.Template('<li><div>'
             '<span class="actor"><a href="${actor_url}">${actor_name}</a></span> '
-            '${action}ed working on <span class="task">"${round_name}"</span> '
+            '${action}ed working on <span class="round">"${round_name}"</span> '
             '${timestamp}</div></li>'
             )
         self.write('''\

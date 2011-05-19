@@ -3,6 +3,7 @@
 import core.round_
 import core.user
 import core.subscription
+import mq
 
 import base
 
@@ -44,6 +45,7 @@ class SubscriptionHandler(base.RequestHandler):
     
     @base.oauth_method
     def post(self, u_id, action):
+        #TODO: Should disallow subcribing to self (it's always on)
         #HACK-begin
         app = None
         usr = None
@@ -70,16 +72,22 @@ class SubscriptionHandler(base.RequestHandler):
                     pending=False
                     )
                 subs.save()
+                #HACK!!
+                mq.subscribe(usr, u_ref)
                 self.send_json(201, subs.prep_dump(details=3))
                 return
             if not subs.active:
                 subs.active = True
                 subs.save()
+                #HACK!!
+                mq.subscribe(usr, u_ref)
             self.send_json(200, subs.prep_dump(details=3))
             return
         if subs and subs.active:
             subs.active = False
             subs.save()
+            #HACK!!
+            mq.unsubscribe(usr, u_ref)
         self.send_json(200, dict())
             
     

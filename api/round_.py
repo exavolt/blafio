@@ -59,7 +59,7 @@ class Handler(base.RequestHandler):
             app=app
             )
         rd_act.save()
-        mq.publish(usr, rd_act)
+        mq.publish(usr, rd_act, published_datetime=rd_act.timestamp)
         self.send_json(201, rd_act.prep_dump(details=3))
 
 

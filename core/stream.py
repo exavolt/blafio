@@ -22,5 +22,11 @@ class StreamItem(db.Document):
     stream = db.ReferenceField(Stream)
     publisher = db.ReferenceField(user.User) #TODO: generic
     object = db.ReferenceField(round_.RoundActivity)
+    published_datetime = db.DateTimeField()
     deleted = db.BooleanField(default=False)
+    
+    def prep_dump(self, details=2):
+        #TODO: the stream item or the object?
+        return self.object.prep_dump(details=2)
+    
 

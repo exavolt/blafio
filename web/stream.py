@@ -12,18 +12,39 @@ def datetime_timeago_abbr(dt):
         dt.strftime("%A, %d %B %Y %H:%M GMT"),
         )
     
+#TODO: Different template for each action type
+#TODO: i18n-L10n
+activity_templates = dict()
+activity_templates['start'] = string.Template('<li><div>'
+    '<span class="actor"><a href="${actor_url}">${actor_name}</a></span> '
+    'started <span class="round">"${round_name}"</span> '
+    '${timestamp}</div></li>'
+    )
+activity_templates['finish'] = string.Template('<li><div>'
+    '<span class="actor"><a href="${actor_url}">${actor_name}</a></span> '
+    'finished <span class="round">"${round_name}"</span> '
+    '${timestamp}</div></li>'
+    )
+activity_templates['reset'] = string.Template('<li><div>'
+    '<span class="actor"><a href="${actor_url}">${actor_name}</a></span> '
+    'cancelled <span class="round">"${round_name}"</span> '
+    '${timestamp}</div></li>'
+    )
+activity_templates['interrupt'] = string.Template('<li><div>'
+    '<span class="actor"><a href="${actor_url}">${actor_name}</a></span> '
+    'interrupted <span class="round">"${round_name}"</span> '
+    '${timestamp}</div></li>'
+    )
+activity_templates['resume'] = string.Template('<li><div>'
+    '<span class="actor"><a href="${actor_url}">${actor_name}</a></span> '
+    'resumed <span class="round">"${round_name}"</span> '
+    '${timestamp}</div></li>'
+    )
 
 
 class ViewHandler(tornado.web.RequestHandler):
     
     def get(self):
-        #TODO: Different template for each action type
-        #TODO: i18n-L10n
-        tpl = string.Template('<li><div>'
-            '<span class="actor"><a href="${actor_url}">${actor_name}</a></span> '
-            '${action}ed working on <span class="task">"${round_name}"</span> '
-            '${timestamp}</div></li>'
-            )
         self.write('''\
 <script src="/static/jquery-1.6.1.min.js" type="text/javascript"></script>
 <script src="/static/jquery.timeago.js" type="text/javascript"></script>
@@ -36,6 +57,7 @@ jQuery(document).ready(function() {
         self.write('<h1>Global Stream</h1>\n')
         self.write('<ul>')
         for act in core.round_.RoundActivity.objects.order_by('-timestamp')[:20]:#.all():
+            tpl = activity_templates[act.action]
             #TODO: HTML escape
             self.write(tpl.substitute(
                 actor_url="/u/" + act.actor.name,
