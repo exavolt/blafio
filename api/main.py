@@ -29,7 +29,8 @@ def main():
         password='000000'
         )
     handlers = [
-        (r"/1.0/home/stream.json", me.StreamHandler),
+        (r"/1.0/home/stream/([A-Za-z0-9_]+).json", me.HomeStreamHandler),
+        (r"/1.0/me/stream/([A-Za-z0-9_]+).json", me.SelfStreamHandler),
         (r"/1.0/stream.json", stream.Handler),
         (r"/1.0/round/(start|finish|reset|interrupt|resume).json", round_.Handler),
         (r"/1.0/round-([a-z0-9]+).json", round_.Handler),

@@ -60,6 +60,8 @@ class SubscriptionHandler(base.RequestHandler):
         u_ref = core.user.User.objects(id=u_id).first()
         if not u_ref:
             raise base.HTTPError(404, "User not found")
+        if u_ref.id == usr.id:
+            raise base.HTTPError(403, "Cannot follow self")
         subs = core.subscription.Subscription.objects(
             subscriber=usr,
             publisher=u_ref).first()

@@ -10,6 +10,7 @@ class Stream(db.Document):
     
     owner = db.ReferenceField(user.User)
     context = db.StringField()
+    publishing = db.BooleanField(default=False)
     
     def prep_dump(self, details=2):
         pass
@@ -23,6 +24,7 @@ class StreamItem(db.Document):
     activity = db.GenericReferenceField()
     publish_datetime = db.DateTimeField()
     deleted = db.BooleanField(default=False)
+    #TODO: extended data for self (privacy, delete datetime)
     
     def prep_dump(self, details=2):
         #TODO: the stream item or the object?
@@ -31,15 +33,4 @@ class StreamItem(db.Document):
     def to_activity_stream_item_dict(self, details=2):
         return self.activity.to_activity_stream_item_dict(details=details)
     
-# 
-# class StreamProfileItem(db.Document):
-#     meta = {'collection': 'StreamProfileItem'}
-#     
-#     actor = db.ReferenceField(user.User) # Actor == owner
-#     context = db.StringField() # An user can have multiple profiles (some of them are: 'public')
-#     activity = db.GenericReferenceField()
-#     publish_datetime = db.DateTimeField()
-#     deleted = db.BooleanField(default=False)
-#     detete_datetime = db.DateTimeField()
-
 

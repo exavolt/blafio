@@ -12,6 +12,7 @@ class Round(db.Document):
     
     user = db.ReferenceField(user.User)
     name = db.StringField() # The name of the round (could be taken from the tasks)
+    #TODO: the state
     
     def prep_dump(self, details=2):
         if details == 1:
@@ -58,8 +59,8 @@ class RoundActivity(db.Document):
             verb=self.action,
             object=dict(
                 objectType='round',
-                id=str(self.round.id), #TODO: permanent, universally unique identifier
-                displayName=self.round.name
+                id=str(self.round_.id), #TODO: permanent, universally unique identifier
+                displayName=self.round_.name
                 ),
             published=self.timestamp.isoformat(),
             generator=dict(
