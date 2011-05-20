@@ -1,4 +1,6 @@
 
+#TODO: Context, privacy
+
 import mongoengine as db
 
 import app
@@ -43,6 +45,28 @@ class RoundActivity(db.Document):
             timestamp=self.timestamp.isoformat(),
             tasks=dict(count=0, data=[]),
             application=self.app.prep_dump(details=1) if self.app else {}
+            )
+    
+    def to_activity_stream_item_dict(self, details=2):
+        return dict(
+            id=str(self.id), #TODO: permanent, universally unique identifier
+            actor=dict(
+                id=str(self.actor.id), #TODO: permanent, universally unique identifier
+                displayName=self.actor.name,
+                #TODO: url, pic
+                ),
+            verb=self.action,
+            object=dict(
+                objectType='round',
+                id=str(self.round.id), #TODO: permanent, universally unique identifier
+                displayName=self.round.name
+                ),
+            published=self.timestamp.isoformat(),
+            generator=dict(
+                id=str(self.app.id), #TODO: permanent, universally unique identifier
+                displayName=self.app.name
+                ),
+            #TODO: Tasks, icon, url
             )
     
 

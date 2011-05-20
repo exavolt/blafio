@@ -6,109 +6,109 @@ import core.subscription
 import core.stream
 
 
-def publish(publisher, item, published_datetime=None):
+def publish(publisher, activity, publish_datetime=None):
     #TODO: all other parameters (e.g.: priority, context, datetime, ...)
-    logging.warn("Pubsub publish " + publisher.name)
-    #TODO: Check whether the item is already published or not (look into 
-    # global stream)
-    if not published_datetime:
-        published_datetime = datetime.utcnow()
-    sti = core.stream.StreamItem(
-        stream=None,
-        publisher=publisher,
-        object=item,
-        published_datetime=published_datetime
-        )
-    sti.save()
-    #TODO: to self
-    stx = core.stream.Stream.objects(owner=publisher).first()
-    #HACK-begin
+    #TODO: Check whether the activity is already published or not
+    # Publisher's profile stream
+    stx = core.stream.Stream.objects(owner=publisher, context='self').first()
     if not stx:
-        stx = core.stream.Stream(
-            owner=publisher,
-            context='main'
-            )
-        stx.save()
-    #HACK-end
+        stx = core.stream.Stream(owner=publisher, context='self').save()
     sti = core.stream.StreamItem(
         stream=stx,
         publisher=publisher,
-        object=item,
-        published_datetime=published_datetime
+        activity=activity,
+        publish_datetime=publish_datetime
         )
     sti.save()
-    #TODO: wisely broadcast
+    # Publisher's home stream
+    stx = core.stream.Stream.objects(owner=publisher, context='home').first()
+    if not stx:
+        stx = core.stream.Stream(owner=publisher, context='home').save()
+    sti = core.stream.StreamItem(
+        stream=stx,
+        publisher=publisher,
+        activity=activity,
+        publish_datetime=publish_datetime
+        )
+    sti.save()
+    #TODO: wisely use the processing resources to broadcast
     for pubsub in core.subscription.Subscription.objects(publisher=publisher, active=True):
         #TODO: skip self
-        stx = core.stream.Stream.objects(owner=pubsub.subscriber).first()
-        #HACK-begin
+        stx = core.stream.Stream.objects(owner=pubsub.subscriber, context='home').first()
         if not stx:
-            stx = core.stream.Stream(
-                owner=pubsub.subscriber,
-                context='main'
-                )
-            stx.save()
-        #HACK-end
+            stx = core.stream.Stream(owner=pubsub.subscriber, context='home').save()
         sti = core.stream.StreamItem(
             stream=stx,
             publisher=publisher,
-            object=item,
-            published_datetime=published_datetime
+            activity=activity,
+            publish_datetime=publish_datetime
             )
         sti.save()
+    
 
-
-def unpublish(item):
-    pass
-
+def unpublish(publisher, activity):
+    # Publisher's profile stream
+    stx = core.stream.Stream.objects(owner=publisher, context='self').first()
+    if not stx:
+        stx = core.stream.Stream(owner=publisher, context='self').save()
+    sti = core.stream.StreamItem(stream=stx, publisher=publisher, activity=activity).first()
+    if sti:
+        sti.deleted = True
+        sti.save()
+    # Publisher's home stream
+    stx = core.stream.Stream.objects(owner=publisher, context='home').first()
+    if not stx:
+        stx = core.stream.Stream(owner=publisher, context='home').save()
+    sti = core.stream.StreamItem(stream=stx, publisher=publisher, activity=activity).first()
+    if sti:
+        sti.deleted = True
+        sti.save()
+    #TODO: wisely use the processing resources to broadcast
+    for pubsub in core.subscription.Subscription.objects(publisher=publisher, active=True):
+        #TODO: skip self
+        stx = core.stream.Stream.objects(owner=pubsub.subscriber, context='home').first()
+        if not stx:
+            stx = core.stream.Stream(owner=pubsub.subscriber, context='home').save()
+        sti = core.stream.StreamItem(stream=stx, publisher=publisher, activity=activity).first()
+        if sti:
+            sti.deleted = True
+            sti.save()
+    
 
 def subscribe(actor, publisher):
-    #TODO: What will happen here is that the actor will get old items 
+    #TODO: What will happen here is that the actor will get old entries 
     # from the publisher in his stream.
-    stxp = core.stream.Stream.objects(owner=publisher).first()
-    #HACK-begin
+    # Get the publisher's 'self' stream
+    stxp = core.stream.Stream.objects(owner=publisher, context='self').first()
     if not stxp:
-        stxp = core.stream.Stream(
-            owner=actor,
-            context='main'
-            )
-        stxp.save()
-    #HACK-end
-    stxs = core.stream.Stream.objects(owner=actor).first()
-    #HACK-begin
+        stxp = core.stream.Stream(owner=publisher, context='self').save()
+    # Get subscriber's 'home' stream
+    stxs = core.stream.Stream.objects(owner=actor, context='home').first()
     if not stxs:
-        stxs = core.stream.Stream(
-            owner=actor,
-            context='main'
-            )
-        stxs.save()
-    #HACK-end
-    #TODO: get all items (latest first, older gets lower processing priority)
-    query = core.stream.StreamItem.objects(stream=stxp, publisher=publisher).order_by('-published_timestamp')[:20]
+        stxs = core.stream.Stream(owner=actor, context='home').save()
+    #TODO: get all entries (latest first, older gets lower processing priority)
+    query = core.stream.StreamItem.objects(stream=stxp, 
+        publisher=publisher).order_by('-msglogtimestamp')[:20]
     for stip in query:
         stis = core.stream.StreamItem(
             stream=stxs,
             publisher=publisher,
-            object=stip.object,
-            published_datetime=stip.published_datetime
+            activity=stip.activity,
+            publish_datetime=stip.publish_datetime
             )
         stis.save()
-
+    
 
 def unsubscribe(actor, publisher):
-    #TODO: What will happen here is that the publisher's items will be 
+    #TODO: What will happen here is that the publisher's entries will be 
     # removed from the actor's stream.
-    stx = core.stream.Stream.objects(owner=actor).first()
-    #HACK-begin
+    #TODO: From all streams (contexts)
+    stx = core.stream.Stream.objects(owner=actor, context='home').first()
     if not stx:
-        stx = core.stream.Stream(
-            owner=actor,
-            context='main'
-            )
-        stx.save()
-    #HACK-end
-    #TODO: get all items (latest first, older gets lower processing priority)
-    query = core.stream.StreamItem.objects(stream=stx, publisher=publisher).order_by('-published_timestamp')[:20]
+        stx = core.stream.Stream(owner=actor, context='home').save()
+    #TODO: get all entries (latest first, older gets lower processing priority)
+    query = core.stream.StreamItem.objects(stream=stx, 
+        publisher=publisher).order_by('-msglogtimestamp')[:20]
     for sti in query:
         sti.deleted = True
         sti.save()
