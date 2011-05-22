@@ -32,26 +32,26 @@ def main():
         app_name=appname
         )
     req = urllib2.Request(url, urllib.urlencode(params))
-    act = None
-    the_page = None
+    resp_data = None
+    resp_body = None
     try:
         response = urllib2.urlopen(req)
-        the_page = response.read()
+        resp_body = response.read()
         response.close()
-        act = json.loads(the_page)
+        resp_data = json.loads(resp_body)
     except urllib2.HTTPError, http_err:
         print "Non-OK response: %d" % http_err.code
         if http_err.code == 201:
-            the_page = http_err.read()
-            act = json.loads(the_page)
+            resp_body = http_err.read()
+            resp_data = json.loads(resp_body)
         else:
             print http_err.read()
         http_err.close()
-    if not act:
+    if not resp_data:
         print "Something's not right"
         return
-    if the_page:
-        print the_page
+    if resp_body:
+        print resp_body
 
 
 if __name__ == "__main__":

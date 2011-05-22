@@ -1,22 +1,24 @@
-# App
+#!/usr/bin/env python
 
 import mongoengine as db
 
-import user
+import blafiocore.user
 
 
 def normalize_name(strname):
     return strname.strip().lower()
 
 
-class App(db.Document):
-    meta = {'collection': 'blafio_App'}
+class Client(db.Document):
+    meta = {'collection': 'blafiooauth_Client'}
     
     name = db.StringField() # Display name
     idname = db.StringField() # Normalized name
-    #key_ = db.StringField() # App's key (use only ID?)
+    #key_ = db.StringField() # Client's key (use only ID?)
     secret = db.StringField()
-    #TODO: app kind (internal, 3rd-party, ...)
+    #TODO: client kind (internal, 3rd-party, ...)
+    #TODO: ACL
+    #TODO: creator
     
     def prep_dump(self, details=2):
         if details == 1:
@@ -31,12 +33,12 @@ class App(db.Document):
             )
     
 
-class AppAccess(db.Document):
-    meta = {'collection': 'blafio_AppAccess'}
+class Access(db.Document):
+    meta = {'collection': 'blafiooauth_Access'}
     
     token = db.StringField()
-    app = db.ReferenceField(App)
-    user = db.ReferenceField(user.User)
+    client = db.ReferenceField(Client)
+    user = db.ReferenceField(blafiocore.user.User)
     #TODO: expiration, resources
     
     def prep_dump(self, details=2):
@@ -46,7 +48,8 @@ class AppAccess(db.Document):
                 )
         return dict(
             token=self.token,
-            app=self.app.prep_dump(details=1),
+            client=self.client.prep_dump(details=1),
             user=self.user.prep_dump(details=1)
             )
+    
 

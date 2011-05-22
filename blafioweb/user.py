@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 import string
-import core.user
-import core.round_
+import blafiocore.user
+import blafiocore.round_
 import tornado.web
 
 
@@ -18,8 +18,8 @@ def datetime_timeago_abbr(dt):
 class Handler(tornado.web.RequestHandler):
     
     def get(self, uname):
-        idname = core.user.normalize_name(uname)
-        usr = core.user.User.objects(idname=idname).first()
+        idname = blafiocore.user.normalize_name(uname)
+        usr = blafiocore.user.User.objects(idname=idname).first()
         if not usr:
             raise tornado.web.HTTPError(404, "User '" + uname + "' is not found")
         #TODO: Different template for each action type
@@ -39,7 +39,7 @@ jQuery(document).ready(function() {
 </script>
 ''')
         self.write('<h1>%s</h1>\n' % usr.name)
-        act = core.round_.RoundActivity.objects(actor=usr).order_by('-timestamp').first()
+        act = blafiocore.round_.RoundActivity.objects(actor=usr).order_by('-timestamp').first()
         if act:
             if act.action == 'finish':
                 self.write('<p>Taking a break after "%s" from %s.</p>\n' % (
@@ -51,7 +51,7 @@ jQuery(document).ready(function() {
             self.write('<p><a href="/u/%s/follow">+ Follow</a></p>\n' % usr.name)
         self.write('<h2>Stream</h2>\n')
         self.write('<ul>')
-        for act in core.round_.RoundActivity.objects(actor=usr).order_by('-timestamp')[:20]:#.all():
+        for act in blafiocore.round_.RoundActivity.objects(actor=usr).order_by('-timestamp')[:20]:#.all():
             #TODO: HTML escape
             self.write(tpl.substitute(
                 actor_url="/u/" + act.actor.name,

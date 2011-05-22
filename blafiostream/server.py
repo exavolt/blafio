@@ -2,8 +2,8 @@
 from datetime import datetime
 import logging
 
-import core.pubsub
-import core.stream
+import blafiocore.pubsub
+import core
 
 
 def publish(publisher, activity):
@@ -14,11 +14,11 @@ def publish(publisher, activity):
     if not published_datetime:
         published_datetime = datetime.utcnow()
     # Publisher's profile stream
-    stx = core.stream.Stream.objects(owner=publisher, publishing=True, context='general').first()
+    stx = core.Stream.objects(owner=publisher, publishing=True, context='general').first()
     if not stx:
-        stx = core.stream.Stream(owner=publisher, publishing=True, context='general')
+        stx = core.Stream(owner=publisher, publishing=True, context='general')
         stx.save()
-    sti = core.stream.StreamItem(
+    sti = core.Entry(
         stream=stx,
         publisher=publisher,
         activity=activity,
@@ -26,11 +26,11 @@ def publish(publisher, activity):
         )
     sti.save()
     # Publisher's home stream
-    stx = core.stream.Stream.objects(owner=publisher, publishing=False, context='public').first()
+    stx = core.Stream.objects(owner=publisher, publishing=False, context='public').first()
     if not stx:
-        stx = core.stream.Stream(owner=publisher, publishing=False, context='public')
+        stx = core.Stream(owner=publisher, publishing=False, context='public')
         stx.save()
-    sti = core.stream.StreamItem(
+    sti = core.Entry(
         stream=stx,
         publisher=publisher,
         activity=activity,
@@ -38,13 +38,13 @@ def publish(publisher, activity):
         )
     sti.save()
     #TODO: wisely use the processing resources to broadcast
-    for pubsub in core.pubsub.Subscription.objects(publisher=publisher, active=True):
+    for pubsub in blafiocore.pubsub.Subscription.objects(publisher=publisher, active=True):
         #TODO: skip self
-        stx = core.stream.Stream.objects(owner=pubsub.subscriber, publishing=False, context='public').first()
+        stx = core.Stream.objects(owner=pubsub.subscriber, publishing=False, context='public').first()
         if not stx:
-            stx = core.stream.Stream(owner=pubsub.subscriber, publishing=False, context='public')
+            stx = core.Stream(owner=pubsub.subscriber, publishing=False, context='public')
             stx.save()
-        sti = core.stream.StreamItem(
+        sti = core.Entry(
             stream=stx,
             publisher=publisher,
             activity=activity,
@@ -54,32 +54,33 @@ def publish(publisher, activity):
     
 
 def unpublish(publisher, activity):
+    #TODO: Check that the publisher has the privilege to the activity 
     # Publisher's profile stream
-    stx = core.stream.Stream.objects(owner=publisher, publishing=True, context='general').first()
+    stx = core.Stream.objects(owner=publisher, publishing=True, context='general').first()
     if not stx:
-        stx = core.stream.Stream(owner=publisher, publishing=True, context='general')
+        stx = core.Stream(owner=publisher, publishing=True, context='general')
         stx.save()
-    sti = core.stream.StreamItem(stream=stx, publisher=publisher, activity=activity).first()
+    sti = core.Entry(stream=stx, publisher=publisher, activity=activity).first()
     if sti:
         sti.deleted = True
         sti.save()
     # Publisher's home stream
-    stx = core.stream.Stream.objects(owner=publisher, publishing=False, context='public').first()
+    stx = core.Stream.objects(owner=publisher, publishing=False, context='public').first()
     if not stx:
-        stx = core.stream.Stream(owner=publisher, publishing=False, context='public')
+        stx = core.Stream(owner=publisher, publishing=False, context='public')
         stx.save()
-    sti = core.stream.StreamItem(stream=stx, publisher=publisher, activity=activity).first()
+    sti = core.Entry(stream=stx, publisher=publisher, activity=activity).first()
     if sti:
         sti.deleted = True
         sti.save()
     #TODO: wisely use the processing resources to broadcast
-    for pubsub in core.pubsub.Subscription.objects(publisher=publisher, active=True):
+    for pubsub in blafiocore.pubsub.Subscription.objects(publisher=publisher, active=True):
         #TODO: skip self
-        stx = core.stream.Stream.objects(owner=pubsub.subscriber, publishing=False, context='public').first()
+        stx = core.Stream.objects(owner=pubsub.subscriber, publishing=False, context='public').first()
         if not stx:
-            stx = core.stream.Stream(owner=pubsub.subscriber, publishing=False, context='public')
+            stx = core.Stream(owner=pubsub.subscriber, publishing=False, context='public')
             stx.save()
-        sti = core.stream.StreamItem(stream=stx, publisher=publisher, activity=activity).first()
+        sti = core.Entry(stream=stx, publisher=publisher, activity=activity).first()
         if sti:
             sti.deleted = True
             sti.save()
@@ -89,20 +90,20 @@ def subscribe(actor, publisher):
     #TODO: What will happen here is that the actor will get old entries 
     # from the publisher in his stream.
     # Get the publisher's 'self' stream
-    stxp = core.stream.Stream.objects(owner=publisher, publishing=True, context='general').first()
+    stxp = core.Stream.objects(owner=publisher, publishing=True, context='general').first()
     if not stxp:
-        stxp = core.stream.Stream(owner=publisher, publishing=True, context='general')
+        stxp = core.Stream(owner=publisher, publishing=True, context='general')
         stxp.save()
     # Get subscriber's 'home' stream
-    stxs = core.stream.Stream.objects(owner=actor, publishing=False, context='public').first()
+    stxs = core.Stream.objects(owner=actor, publishing=False, context='public').first()
     if not stxs:
-        stxs = core.stream.Stream(owner=actor, publishing=False, context='public')
+        stxs = core.Stream(owner=actor, publishing=False, context='public')
         stxs.save()
     #TODO: get all entries (latest first, older gets lower processing priority)
-    query = core.stream.StreamItem.objects(stream=stxp, 
+    query = core.Entry.objects(stream=stxp, 
         publisher=publisher).order_by('-published_datetime')[:20]
     for stip in query:
-        stis = core.stream.StreamItem(
+        stis = core.Entry(
             stream=stxs,
             publisher=publisher,
             activity=stip.activity,
@@ -115,16 +116,15 @@ def unsubscribe(actor, publisher):
     #TODO: What will happen here is that the publisher's entries will be 
     # removed from the actor's stream.
     #TODO: From all streams (contexts)
-    stx = core.stream.Stream.objects(owner=actor, publishing=False, context='public').first()
+    stx = core.Stream.objects(owner=actor, publishing=False, context='public').first()
     if not stx:
-        stx = core.stream.Stream(owner=actor, publishing=False, context='public')
+        stx = core.Stream(owner=actor, publishing=False, context='public')
         stx.save()
     #TODO: get all entries (latest first, older gets lower processing priority)
-    query = core.stream.StreamItem.objects(stream=stx, 
+    query = core.Entry.objects(stream=stx, 
         publisher=publisher).order_by('-published_datetime')[:20]
     for sti in query:
         sti.deleted = True
         sti.save()
     
-
 

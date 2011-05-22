@@ -27,13 +27,13 @@ class RequestHandler(tornado.web.RequestHandler):
         self.clear()
         self.set_status(status_code)
         self.set_header('Content-Type', 'application/json')
-        data = dict(code=status_code, message='')
+        data = dict(error='500') #TODO: more info
         if kwargs.get('exception'):
             e = kwargs['exception']
-            if isinstance(e, HTTPError):
-                data['message'] = e.message
+            if isinstance(e, HTTPError) and e.error:
+                data['error'] = e.error
             else:
-                data['message'] = httplib.responses[status_code] #str(e)
+                data['error'] = str(status_code) #TODO: disallow some codes
         self.finish(json.dumps(data))
     
     def send_json(self, status_code, json_data):
@@ -50,9 +50,9 @@ class RequestHandler(tornado.web.RequestHandler):
 
 class HTTPError(tornado.web.HTTPError):
     
-    def __init__(self, status_code, message, log_message=None, *args):
-        tornado.web.HTTPError.__init__(self, status_code, log_message, *args)
-        self.message = message
+    def __init__(self, status_code, error, log_message=None, *args):
+        tarnado.web.HTTPError.__init__(self, status_code, log_message, *args)
+        self.error = error
     
 
 #TODO: add parameter whether the authentication is required or not

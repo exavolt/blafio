@@ -4,19 +4,22 @@ import sys
 import os.path
 import daemon
 
+
 class Daemon(daemon.Daemon):
     
     def run(self):
         import main
         main.main()
+    
 
 if __name__ == "__main__":
+    #TODO: parse the arguments after the command to be passed to the process
+    base_filename = '/tmp/blafioapi' #TODO: get the port from the argv
     d = Daemon(
-        pidfile='/tmp/blafio-web.pid', 
-        stdout='/tmp/blafio-web.out',
-        stderr='/tmp/blafio-web.err'
+        pidfile=base_filename + '.pid', 
+        stdout=base_filename + '.out',
+        stderr=base_filename + '.err'
         )
-    #d.base_path = os.path.dirname(os.path.abspath(__file__))
     if len(sys.argv) == 2:
         if 'start' == sys.argv[1]:
             d.start()

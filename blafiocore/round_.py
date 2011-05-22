@@ -3,7 +3,7 @@
 
 import mongoengine as db
 
-import app
+import blafiooauth.core
 import user
 
 
@@ -34,7 +34,7 @@ class RoundActivity(db.Document):
     round_ = db.ReferenceField(Round)
     action = db.StringField() # Limited to: start, reset, finish, interrupt, resume
     timestamp = db.DateTimeField()
-    app = db.ReferenceField(app.App)
+    app = db.ReferenceField(blafiooauth.core.Client)
     #TODO: private? context? tasks
     
     def prep_dump(self, details=2):

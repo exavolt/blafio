@@ -8,9 +8,8 @@ import logging
 
 import tornado.web
 
-#TODO: should be 'blafio.core.round_'
-import core.user
-import core.app
+import blafiooauth.core
+import blafiocore.user
 
 import base
 
@@ -24,7 +23,7 @@ def administrator(method):
         access_token = self.get_arguments('access_token', None)
         if not access_token and access_token != ADMIN_TOKEN:
             logging.error("Invalid access token: " + str(access_token))
-            raise tornado.web.HTTPError(404)
+            raise base.HTTPError(404, error="404") # Mimics the default 404
         return method(self, *args, **kwargs)
     return wrapper
 
@@ -35,10 +34,10 @@ class UserHandler(base.RequestHandler):
     def post(self):
         #TODO: Checks!!
         name = self.get_argument('name')
-        idname = core.user.normalize_name(name)
-        usr = core.user.User.objects(idname=idname).first()
+        idname = blafiocore.user.normalize_name(name)
+        usr = blafiocore.user.User.objects(idname=idname).first()
         if not usr:
-            usr = core.user.User(
+            usr = blafiocore.user.User(
                 name=name,
                 idname=idname
                 )
@@ -54,13 +53,13 @@ class AppHandler(base.RequestHandler):
     def post(self):
         #TODO: Checks!!
         name = self.get_argument('name')
-        idname = core.app.normalize_name(name)
+        idname = blafiooauth.core.normalize_name(name)
         secret = self.get_argument('secret', None) or \
             ''.join(random.choice(string.ascii_letters + string.digits) 
                     for x in range(40))
-        app = core.app.App.objects(idname=idname).first()
+        app = blafiooauth.core.Client.objects(idname=idname).first()
         if not app:
-            app = core.app.App(
+            app = blafiooauth.core.Client(
                 name=name,
                 idname=idname,
                 secret=secret
@@ -79,18 +78,18 @@ class AppAccessHandler(base.RequestHandler):
     @administrator
     def post(self):
         #TODO: Checks!!
-        user_name = core.user.normalize_name(self.get_argument('user_name'))
-        app_name = core.app.normalize_name(self.get_argument('app_name'))
-        usr = core.user.User.objects(idname=user_name).first()
-        app = core.app.App.objects(idname=app_name).first()
+        user_name = blafiocore.user.normalize_name(self.get_argument('user_name'))
+        app_name = blafiooauth.core.normalize_name(self.get_argument('app_name'))
+        usr = blafiocore.user.User.objects(idname=user_name).first()
+        app = blafiooauth.core.Client.objects(idname=app_name).first()
         token = self.get_argument('token', None) or \
             ''.join(random.choice(string.ascii_letters + string.digits) 
                     for x in range(40)) #TODO: Meaningful token
-        access = core.app.AppAccess.objects(user=usr, app=app).first()
+        access = blafiooauth.core.Access.objects(user=usr, client=app).first()
         if not access:
-            access = core.app.AppAccess(
+            access = blafiooauth.core.Access(
                 user=usr,
-                app=app,
+                client=app,
                 token=token
                 )
             access.save()

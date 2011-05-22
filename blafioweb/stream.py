@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import string
-import core.round_
+import blafiocore.round_
 import tornado.web
 
 
@@ -56,7 +56,7 @@ jQuery(document).ready(function() {
 ''')
         self.write('<h1>Global Stream</h1>\n')
         self.write('<ul>')
-        for act in core.round_.RoundActivity.objects.order_by('-timestamp')[:20]:#.all():
+        for act in blafiocore.round_.RoundActivity.objects.order_by('-timestamp')[:20]:#.all():
             tpl = activity_templates[act.action]
             #TODO: HTML escape
             self.write(tpl.substitute(

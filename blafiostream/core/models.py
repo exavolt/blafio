@@ -4,7 +4,7 @@ import mongoengine as db
 
 
 class Stream(db.Document):
-    meta = {'collection': 'blafio_Stream'}
+    meta = {'collection': 'blafiostream_Stream'}
     
     owner = db.GenericReferenceField()
     context = db.StringField()
@@ -18,8 +18,8 @@ class Stream(db.Document):
             )
     
 
-class StreamItem(db.Document):
-    meta = {'collection': 'blafio_StreamItem'}
+class Entry(db.Document):
+    meta = {'collection': 'blafiostream_Entry'}
     
     stream = db.ReferenceField(Stream)
     publisher = db.GenericReferenceField()
