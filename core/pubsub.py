@@ -4,7 +4,7 @@ import mongoengine as db
 
 
 class Subscription(db.Document):
-    meta = {'collection': 'blafiopubsub_Subscription'}
+    meta = {'collection': 'blafio_Subscription'}
     
     subscriber = db.GenericReferenceField()
     publisher = db.GenericReferenceField()

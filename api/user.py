@@ -2,7 +2,6 @@
 
 import core.round_
 import core.user
-import blafiopubsub
 import mq
 
 import base
@@ -62,12 +61,12 @@ class SubscriptionHandler(base.RequestHandler):
             raise base.HTTPError(404, "User not found")
         if u_ref.id == usr.id:
             raise base.HTTPError(403, "Cannot follow self")
-        subs = blafiopubsub.Subscription.objects(
+        subs = core.pubsub.Subscription.objects(
             subscriber=usr,
             publisher=u_ref).first()
         if action == 'follow':
             if not subs:
-                subs = blafiopubsub.Subscription(
+                subs = core.pubsub.Subscription(
                     subscriber=usr,
                     publisher=u_ref,
                     active=True,

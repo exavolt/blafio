@@ -2,8 +2,8 @@
 from datetime import datetime
 import logging
 
-import blafiopubsub
-import blafiostream
+import core.pubsub
+import core.stream
 
 
 def publish(publisher, activity):
@@ -14,11 +14,11 @@ def publish(publisher, activity):
     if not published_datetime:
         published_datetime = datetime.utcnow()
     # Publisher's profile stream
-    stx = blafiostream.Stream.objects(owner=publisher, publishing=True, context='general').first()
+    stx = core.stream.Stream.objects(owner=publisher, publishing=True, context='general').first()
     if not stx:
-        stx = blafiostream.Stream(owner=publisher, publishing=True, context='general')
+        stx = core.stream.Stream(owner=publisher, publishing=True, context='general')
         stx.save()
-    sti = blafiostream.StreamItem(
+    sti = core.stream.StreamItem(
         stream=stx,
         publisher=publisher,
         activity=activity,
@@ -26,11 +26,11 @@ def publish(publisher, activity):
         )
     sti.save()
     # Publisher's home stream
-    stx = blafiostream.Stream.objects(owner=publisher, publishing=False, context='public').first()
+    stx = core.stream.Stream.objects(owner=publisher, publishing=False, context='public').first()
     if not stx:
-        stx = blafiostream.Stream(owner=publisher, publishing=False, context='public')
+        stx = core.stream.Stream(owner=publisher, publishing=False, context='public')
         stx.save()
-    sti = blafiostream.StreamItem(
+    sti = core.stream.StreamItem(
         stream=stx,
         publisher=publisher,
         activity=activity,
@@ -38,13 +38,13 @@ def publish(publisher, activity):
         )
     sti.save()
     #TODO: wisely use the processing resources to broadcast
-    for pubsub in blafiopubsub.Subscription.objects(publisher=publisher, active=True):
+    for pubsub in core.pubsub.Subscription.objects(publisher=publisher, active=True):
         #TODO: skip self
-        stx = blafiostream.Stream.objects(owner=pubsub.subscriber, publishing=False, context='public').first()
+        stx = core.stream.Stream.objects(owner=pubsub.subscriber, publishing=False, context='public').first()
         if not stx:
-            stx = blafiostream.Stream(owner=pubsub.subscriber, publishing=False, context='public')
+            stx = core.stream.Stream(owner=pubsub.subscriber, publishing=False, context='public')
             stx.save()
-        sti = blafiostream.StreamItem(
+        sti = core.stream.StreamItem(
             stream=stx,
             publisher=publisher,
             activity=activity,
@@ -55,31 +55,31 @@ def publish(publisher, activity):
 
 def unpublish(publisher, activity):
     # Publisher's profile stream
-    stx = blafiostream.Stream.objects(owner=publisher, publishing=True, context='general').first()
+    stx = core.stream.Stream.objects(owner=publisher, publishing=True, context='general').first()
     if not stx:
-        stx = blafiostream.Stream(owner=publisher, publishing=True, context='general')
+        stx = core.stream.Stream(owner=publisher, publishing=True, context='general')
         stx.save()
-    sti = blafiostream.StreamItem(stream=stx, publisher=publisher, activity=activity).first()
+    sti = core.stream.StreamItem(stream=stx, publisher=publisher, activity=activity).first()
     if sti:
         sti.deleted = True
         sti.save()
     # Publisher's home stream
-    stx = blafiostream.Stream.objects(owner=publisher, publishing=False, context='public').first()
+    stx = core.stream.Stream.objects(owner=publisher, publishing=False, context='public').first()
     if not stx:
-        stx = blafiostream.Stream(owner=publisher, publishing=False, context='public')
+        stx = core.stream.Stream(owner=publisher, publishing=False, context='public')
         stx.save()
-    sti = blafiostream.StreamItem(stream=stx, publisher=publisher, activity=activity).first()
+    sti = core.stream.StreamItem(stream=stx, publisher=publisher, activity=activity).first()
     if sti:
         sti.deleted = True
         sti.save()
     #TODO: wisely use the processing resources to broadcast
-    for pubsub in blafiopubsub.Subscription.objects(publisher=publisher, active=True):
+    for pubsub in core.pubsub.Subscription.objects(publisher=publisher, active=True):
         #TODO: skip self
-        stx = blafiostream.Stream.objects(owner=pubsub.subscriber, publishing=False, context='public').first()
+        stx = core.stream.Stream.objects(owner=pubsub.subscriber, publishing=False, context='public').first()
         if not stx:
-            stx = blafiostream.Stream(owner=pubsub.subscriber, publishing=False, context='public')
+            stx = core.stream.Stream(owner=pubsub.subscriber, publishing=False, context='public')
             stx.save()
-        sti = blafiostream.StreamItem(stream=stx, publisher=publisher, activity=activity).first()
+        sti = core.stream.StreamItem(stream=stx, publisher=publisher, activity=activity).first()
         if sti:
             sti.deleted = True
             sti.save()
@@ -89,20 +89,20 @@ def subscribe(actor, publisher):
     #TODO: What will happen here is that the actor will get old entries 
     # from the publisher in his stream.
     # Get the publisher's 'self' stream
-    stxp = blafiostream.Stream.objects(owner=publisher, publishing=True, context='general').first()
+    stxp = core.stream.Stream.objects(owner=publisher, publishing=True, context='general').first()
     if not stxp:
-        stxp = blafiostream.Stream(owner=publisher, publishing=True, context='general')
+        stxp = core.stream.Stream(owner=publisher, publishing=True, context='general')
         stxp.save()
     # Get subscriber's 'home' stream
-    stxs = blafiostream.Stream.objects(owner=actor, publishing=False, context='public').first()
+    stxs = core.stream.Stream.objects(owner=actor, publishing=False, context='public').first()
     if not stxs:
-        stxs = blafiostream.Stream(owner=actor, publishing=False, context='public')
+        stxs = core.stream.Stream(owner=actor, publishing=False, context='public')
         stxs.save()
     #TODO: get all entries (latest first, older gets lower processing priority)
-    query = blafiostream.StreamItem.objects(stream=stxp, 
+    query = core.stream.StreamItem.objects(stream=stxp, 
         publisher=publisher).order_by('-published_datetime')[:20]
     for stip in query:
-        stis = blafiostream.StreamItem(
+        stis = core.stream.StreamItem(
             stream=stxs,
             publisher=publisher,
             activity=stip.activity,
@@ -115,12 +115,12 @@ def unsubscribe(actor, publisher):
     #TODO: What will happen here is that the publisher's entries will be 
     # removed from the actor's stream.
     #TODO: From all streams (contexts)
-    stx = blafiostream.Stream.objects(owner=actor, publishing=False, context='public').first()
+    stx = core.stream.Stream.objects(owner=actor, publishing=False, context='public').first()
     if not stx:
-        stx = blafiostream.Stream(owner=actor, publishing=False, context='public')
+        stx = core.stream.Stream(owner=actor, publishing=False, context='public')
         stx.save()
     #TODO: get all entries (latest first, older gets lower processing priority)
-    query = blafiostream.StreamItem.objects(stream=stx, 
+    query = core.stream.StreamItem.objects(stream=stx, 
         publisher=publisher).order_by('-published_datetime')[:20]
     for sti in query:
         sti.deleted = True
