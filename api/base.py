@@ -12,7 +12,11 @@ import tornado.web
 
 
 class RequestHandler(tornado.web.RequestHandler):
-
+    
+    # Override to disable xsrf checks
+    def check_xsrf_cookie(self):
+        pass
+    
     # Override
     def send_error(self, status_code=500, **kwargs):
         if self._headers_written:
@@ -42,14 +46,14 @@ class RequestHandler(tornado.web.RequestHandler):
             except:
                 indent = 4
         self.finish(json.dumps(json_data, indent=indent))
-
+    
 
 class HTTPError(tornado.web.HTTPError):
     
     def __init__(self, status_code, message, log_message=None, *args):
         tornado.web.HTTPError.__init__(self, status_code, log_message, *args)
         self.message = message
-
+    
 
 #TODO: add parameter whether the authentication is required or not
 def oauth_method(method):

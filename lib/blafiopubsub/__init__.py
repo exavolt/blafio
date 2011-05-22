@@ -1,13 +1,12 @@
+#!/usr/bin/env python
 
 import mongoengine as db
 
-import user
-
 
 class Subscription(db.Document):
-    meta = {'collection': 'Subscription'}
+    meta = {'collection': 'blafiopubsub_Subscription'}
     
-    subscriber = db.ReferenceField(user.User)
+    subscriber = db.GenericReferenceField()
     publisher = db.GenericReferenceField()
     #publiser_class = db.StringField() #TODO: for filtering
     active = db.BooleanField(default=False) # Master flag

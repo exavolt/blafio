@@ -6,6 +6,8 @@ import os.path
 import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'lib'))
 
 import logging
 
@@ -21,13 +23,13 @@ import tornado.ioloop
 
 
 def main():
-    #mongoengine.connect('blafio')
-    mongoengine.connect('blafio-dev', 
-        host='flame.mongohq.com', 
-        port=27100, 
-        username='exavolt', 
-        password='000000'
-        )
+    mongoengine.connect('blafio')
+    # mongoengine.connect('blafio-dev', 
+    #     host='flame.mongohq.com', 
+    #     port=27100, 
+    #     username='exavolt', 
+    #     password='000000'
+    #     )
     handlers = [
         (r"/1.0/home/stream/([A-Za-z0-9_]+).json", me.HomeStreamHandler),
         (r"/1.0/me/stream/([A-Za-z0-9_]+).json", me.SelfStreamHandler),

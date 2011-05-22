@@ -25,10 +25,10 @@ def main():
     
     uid = sys.argv[1]
     url = config.API_BASE_URL + 'user-' + uid + '/follow.json'
-    values = dict(
+    params = dict(
         access_token=config.ACCESS_TOKEN
         )
-    req = urllib2.Request(url, urllib.urlencode(values))
+    req = urllib2.Request(url, urllib.urlencode(params))
     act = None
     try:
         response = urllib2.urlopen(req)
