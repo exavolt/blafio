@@ -8,7 +8,7 @@ import user
 
 
 class Round(db.Document):
-    meta = {'collection': 'Round'}
+    meta = {'collection': 'blafio_Round'}
     
     user = db.ReferenceField(user.User)
     name = db.StringField() # The name of the round (could be taken from the tasks)
@@ -28,7 +28,7 @@ class Round(db.Document):
     
 
 class RoundActivity(db.Document):
-    meta = {'collection': 'RoundActivity'}
+    meta = {'collection': 'blafio_RoundActivity'}
     
     actor = db.ReferenceField(user.User) # Dupe from the Round
     round_ = db.ReferenceField(Round)

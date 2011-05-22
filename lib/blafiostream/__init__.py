@@ -11,7 +11,11 @@ class Stream(db.Document):
     publishing = db.BooleanField(default=False)
     
     def prep_dump(self, details=2):
-        pass
+        return dict(
+            owner=self.owner.prep_dump(details=1),
+            context=self.context,
+            publishing=self.publishing
+            )
     
 
 class StreamItem(db.Document):

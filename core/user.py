@@ -8,7 +8,7 @@ def normalize_name(strname):
 
 
 class User(db.Document):
-    meta = {'collection': 'User'}
+    meta = {'collection': 'blafio_User'}
     
     #account_id = db.StringField() #TODO: the identifier to the account
     name = db.StringField() # Display name

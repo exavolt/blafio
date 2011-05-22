@@ -10,7 +10,7 @@ def normalize_name(strname):
 
 
 class App(db.Document):
-    meta = {'collection': 'App'}
+    meta = {'collection': 'blafio_App'}
     
     name = db.StringField() # Display name
     idname = db.StringField() # Normalized name
@@ -32,7 +32,7 @@ class App(db.Document):
     
 
 class AppAccess(db.Document):
-    meta = {'collection': 'AppAccess'}
+    meta = {'collection': 'blafio_AppAccess'}
     
     token = db.StringField()
     app = db.ReferenceField(App)
