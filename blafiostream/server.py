@@ -18,7 +18,7 @@ def publish(publisher, activity):
     if not stx:
         stx = core.Stream(owner=publisher, publishing=True, context='general')
         stx.save()
-    sti = core.Entry(
+    sti = core.Item(
         stream=stx,
         publisher=publisher,
         activity=activity,
@@ -30,7 +30,7 @@ def publish(publisher, activity):
     if not stx:
         stx = core.Stream(owner=publisher, publishing=False, context='public')
         stx.save()
-    sti = core.Entry(
+    sti = core.Item(
         stream=stx,
         publisher=publisher,
         activity=activity,
@@ -44,7 +44,7 @@ def publish(publisher, activity):
         if not stx:
             stx = core.Stream(owner=pubsub.subscriber, publishing=False, context='public')
             stx.save()
-        sti = core.Entry(
+        sti = core.Item(
             stream=stx,
             publisher=publisher,
             activity=activity,
@@ -60,7 +60,7 @@ def unpublish(publisher, activity):
     if not stx:
         stx = core.Stream(owner=publisher, publishing=True, context='general')
         stx.save()
-    sti = core.Entry(stream=stx, publisher=publisher, activity=activity).first()
+    sti = core.Item(stream=stx, publisher=publisher, activity=activity).first()
     if sti:
         sti.deleted = True
         sti.save()
@@ -69,7 +69,7 @@ def unpublish(publisher, activity):
     if not stx:
         stx = core.Stream(owner=publisher, publishing=False, context='public')
         stx.save()
-    sti = core.Entry(stream=stx, publisher=publisher, activity=activity).first()
+    sti = core.Item(stream=stx, publisher=publisher, activity=activity).first()
     if sti:
         sti.deleted = True
         sti.save()
@@ -80,7 +80,7 @@ def unpublish(publisher, activity):
         if not stx:
             stx = core.Stream(owner=pubsub.subscriber, publishing=False, context='public')
             stx.save()
-        sti = core.Entry(stream=stx, publisher=publisher, activity=activity).first()
+        sti = core.Item(stream=stx, publisher=publisher, activity=activity).first()
         if sti:
             sti.deleted = True
             sti.save()
@@ -100,10 +100,12 @@ def subscribe(actor, publisher):
         stxs = core.Stream(owner=actor, publishing=False, context='public')
         stxs.save()
     #TODO: get all entries (latest first, older gets lower processing priority)
-    query = core.Entry.objects(stream=stxp, 
-        publisher=publisher).order_by('-published_datetime')[:20]
+    query = core.Item.objects(
+        stream=stxp, 
+        publisher=publisher
+        ).order_by('-published_datetime')[:20]
     for stip in query:
-        stis = core.Entry(
+        stis = core.Item(
             stream=stxs,
             publisher=publisher,
             activity=stip.activity,
@@ -121,8 +123,10 @@ def unsubscribe(actor, publisher):
         stx = core.Stream(owner=actor, publishing=False, context='public')
         stx.save()
     #TODO: get all entries (latest first, older gets lower processing priority)
-    query = core.Entry.objects(stream=stx, 
-        publisher=publisher).order_by('-published_datetime')[:20]
+    query = core.Item.objects(
+        stream=stx, 
+        publisher=publisher
+        ).order_by('-published_datetime')[:20]
     for sti in query:
         sti.deleted = True
         sti.save()

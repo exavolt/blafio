@@ -24,7 +24,7 @@ class HomeStreamHandler(base.RequestHandler):
             stream = blafiostream.core.Stream(owner=usr, publishing=False, context=context)
             stream.save()
         data = []
-        for act in blafiostream.core.Entry.objects(stream=stream, 
+        for act in blafiostream.core.Item.objects(stream=stream, 
           deleted=False).order_by('-published_datetime')[:20]:
             data.append(act.prep_dump(details=2))
         self.send_json(200, dict(
@@ -51,7 +51,7 @@ class SelfStreamHandler(base.RequestHandler):
             stream = blafiostream.core.Stream(owner=usr, publishing=True, context=context)
             stream.save()
         data = []
-        for act in blafiostream.core.Entry.objects(stream=stream, 
+        for act in blafiostream.core.Item.objects(stream=stream, 
           deleted=False).order_by('-published_datetime')[:20]:
             data.append(act.prep_dump(details=2))
         self.send_json(200, dict(

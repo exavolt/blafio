@@ -18,8 +18,8 @@ class Stream(db.Document):
             )
     
 
-class Entry(db.Document):
-    meta = {'collection': 'blafiostream_Entry'}
+class Item(db.Document):
+    meta = {'collection': 'blafiostream_Item'}
     
     stream = db.ReferenceField(Stream)
     publisher = db.GenericReferenceField()
