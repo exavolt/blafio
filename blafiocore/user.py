@@ -10,7 +10,7 @@ def normalize_name(strname):
 class User(db.Document):
     meta = {'collection': 'blafio_User'}
     
-    #account_id = db.StringField() #TODO: the identifier to the account
+    account_id = db.StringField() #TODO: the identifier to the account
     name = db.StringField() # Display name
     idname = db.StringField() # Normalized name
     #status = db.StringField() # Limited to: break, run, interrupt

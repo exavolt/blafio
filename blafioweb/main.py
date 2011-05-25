@@ -12,10 +12,13 @@ sys.path.append(os.path.join(
 import logging
 
 import index
+import me
 import stream
 import user
 
 import mongoengine
+import soulbox
+import soulgate
 import tornado.web
 import tornado.ioloop
 
@@ -30,13 +33,17 @@ def main():
     #     )
     settings = dict(
         static_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "static"),
+        cookie_secret='43oETzKXQAGaYdkL5gEmGeJJFuYh7EQnp2XdTP1o/Vo=', #TODO: Use different secret from the auth
         )
     application = tornado.web.Application([
         (r"/", index.ViewHandler),
+        (r"/me", me.HomeHandler),
         (r"/stream", stream.ViewHandler),
         (r"/u/([A-Za-z0-9_]+)", user.Handler),
         ], **settings)
     application.listen(11001)
+    soulgate.connect(backend='redis', 
+        auth_service=soulbox.AuthServiceInfo('http://example.com:8888/account/'))
     tornado.ioloop.IOLoop.instance().start()
 
 
