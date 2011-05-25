@@ -51,7 +51,7 @@ class RequestHandler(tornado.web.RequestHandler):
 class HTTPError(tornado.web.HTTPError):
     
     def __init__(self, status_code, error, log_message=None, *args):
-        tarnado.web.HTTPError.__init__(self, status_code, log_message, *args)
+        tornado.web.HTTPError.__init__(self, status_code, log_message, *args)
         self.error = error
     
 
