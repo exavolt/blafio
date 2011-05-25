@@ -6,10 +6,10 @@ import os.path
 sys.path.append(os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'lib'))
 
-import daemon
+import simpledaemon
 
 
-class Daemon(daemon.Daemon):
+class Daemon(simpledaemon.Daemon):
     
     def run(self):
         import main
