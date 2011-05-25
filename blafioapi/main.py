@@ -10,6 +10,8 @@ sys.path.append(os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'lib'))
 
 import logging
+import daemon
+import pid
 
 import me
 import stream
@@ -21,8 +23,15 @@ import mongoengine
 import tornado.web
 import tornado.ioloop
 
+from tornado.options import define, options
 
-def main():
+
+define("host", default="127.0.0.1", help="listen to the specified host", type=str)
+define("port", default=11002, help="run on the given port", type=int)
+define("daemon", default=False, help="run as daemon", type=bool)
+
+
+def run(pidfile=None):
     mongoengine.connect('blafio')
     # mongoengine.connect('blafio-dev', 
     #     host='flame.mongohq.com', 
@@ -46,9 +55,44 @@ def main():
         ]
     settings = dict()
     application = tornado.web.Application(handlers, **settings)
-    application.listen(11002)
-    tornado.ioloop.IOLoop.instance().start()
+    application.listen(options.port)
+    if pidfile:
+        # write the pidfile
+        pid.write(pidfile)
+    try:
+        # enter the Tornado IO loop
+        tornado.ioloop.IOLoop.instance().start()
+    finally:
+        if pidfile:
+            # ensure we remove the pidfile
+            pid.remove(pidfile)
+        print "Shutting down service..."
+        tornado.ioloop.IOLoop.instance().stop()
+    
 
+def main():
+    tornado.options.parse_command_line()
+    if options.daemon:
+        # Capture stdout/err in logfile
+        log_file = '/tmp/blafioapi-%s.log' % options.port
+        log = open(log_file, 'a+')
+        # Check pidfile
+        pidfile = '/tmp/blafioapi-%s.pid' % options.port
+        pid.check(pidfile)
+        # daemonize
+        daemon_context = daemon.DaemonContext(
+            stdout=log, 
+            stderr=log, 
+            working_directory='.'
+            )
+        with daemon_context:
+            run(pidfile)
+    else:
+        try:
+            run()
+        except KeyboardInterrupt:
+            print "Exit: KeyboardInterrupt"
+    
 
 if __name__ == "__main__":
     main()
