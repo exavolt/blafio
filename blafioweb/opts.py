@@ -34,7 +34,7 @@ if __name__ == "__main__":
     for option in options.itervalues():
         by_file.setdefault(option.file_name, []).append(option)
     print >> outf, """\
-# All the rules in this config is the same with the command line options.
+# All the rules for this config file are the same with the command line options.
 # The options available could be found out by passing `--help` to the main.py
 """
     print >> outf, "#- buit-in options -\n"
