@@ -2,10 +2,10 @@
 
 import sys
 import os.path
-import daemon
+import simpledaemon
 
 
-class Daemon(daemon.Daemon):
+class Daemon(simpledaemon.Daemon):
     
     def run(self):
         import main
