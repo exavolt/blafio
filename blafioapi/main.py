@@ -20,25 +20,31 @@ import user
 import admin
 
 import mongoengine
+import tornado.httpserver
 import tornado.web
 import tornado.ioloop
 
 from tornado.options import define, options
 
 
-define("host", default="127.0.0.1", help="listen to the specified host", type=str)
-define("port", default=11002, help="run on the given port", type=int)
-define("daemon", default=False, help="run as daemon", type=bool)
+define("host", default="127.0.0.1", help="Listen to the specified host")
+define("port", default=11002, help="Run on the given port", type=int)
+define("daemon", default=False, help="Run as daemon", type=bool)
+define("db_name", default="blafio", help="DB Name")
+define("db_host", default=None, help="DB server address")
+define("db_port", default=None, help="DB server port", type=int)
+define("db_usr", default=None, help="DB username")
+define("db_pwd", default=None, help="DB password")
 
 
 def run(pidfile=None):
-    mongoengine.connect('blafio')
-    # mongoengine.connect('blafio-dev', 
-    #     host='flame.mongohq.com', 
-    #     port=27100, 
-    #     username='exavolt', 
-    #     password='000000'
-    #     )
+    mongoengine.connect(options.db_name,
+        host=options.db_host,
+        port=options.db_port,
+        username=options.db_usr,
+        password=options.db_pwd
+        )
+    
     handlers = [
         (r"/1.0/home/stream/([A-Za-z0-9_]+).json", me.HomeStreamHandler),
         (r"/1.0/me/stream/([A-Za-z0-9_]+).json", me.SelfStreamHandler),
@@ -54,19 +60,25 @@ def run(pidfile=None):
         (r"/1.0/__admin_hore/app_access.json", admin.AppAccessHandler),
         ]
     settings = dict()
+    
     application = tornado.web.Application(handlers, **settings)
-    application.listen(options.port)
+    #application = soulbox.web.Middleware(application)
+    
+    http_server = tornado.httpserver.HTTPServer(application)
+    http_server.listen(options.port, address=options.host)
+    logging.info("Listening at %s:%i..." % (options.host, options.port))
+    
     if pidfile:
-        # write the pidfile
+        # Write the pidfile
         pid.write(pidfile)
     try:
-        # enter the Tornado IO loop
+        # Enter the Tornado IO loop
         tornado.ioloop.IOLoop.instance().start()
     finally:
         if pidfile:
-            # ensure we remove the pidfile
+            # Ensure we remove the pidfile
             pid.remove(pidfile)
-        print "Shutting down service..."
+        logging.info("Shutting down service...")
         tornado.ioloop.IOLoop.instance().stop()
     
 
@@ -74,15 +86,15 @@ def main():
     tornado.options.parse_command_line()
     if options.daemon:
         # Capture stdout/err in logfile
-        log_file = '/tmp/blafioapi-%s.log' % options.port
-        log = open(log_file, 'a+')
+        log_fname = '/tmp/blafioapi-%s.log' % options.port
+        log_file = open(log_fname, 'a+')
         # Check pidfile
         pidfile = '/tmp/blafioapi-%s.pid' % options.port
         pid.check(pidfile)
-        # daemonize
+        # Daemonize
         daemon_context = daemon.DaemonContext(
-            stdout=log, 
-            stderr=log, 
+            stdout=log_file, 
+            stderr=log_file, 
             working_directory='.'
             )
         with daemon_context:
@@ -91,7 +103,7 @@ def main():
         try:
             run()
         except KeyboardInterrupt:
-            print "Exit: KeyboardInterrupt"
+            logging.info("Exit: KeyboardInterrupt")
     
 
 if __name__ == "__main__":
