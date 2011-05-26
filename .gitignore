@@ -1,6 +1,7 @@
 *.pyc
 .DS_Store
 *~
+/blafioapi/config.py
 /tests/config.py
 /tests/automated/config.py
 

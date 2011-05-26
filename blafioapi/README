@@ -1,0 +1,29 @@
+
+Simple Usage
+------------
+
+    $ python main.py --daemon --port=11002 --db_host='db.host' --db_port=27017 \
+        --db_name=blafio --db_usr=blafio --db_pwd=secret
+
+Or you can create a configuration file `./config.py` (you can copy the sample 
+and rename it), put the options in there and it all will be automatically loaded.
+
+
+Requirements
+------------
+
+Python 2.6 or 2.7. Not 2.5 or below or 3.x.
+
+
+Dependencies
+------------
+
+* asyncmongo
+* lockfile
+* mongoengine
+* pymongo
+* python-daemon
+* redis
+* tornado
+* wsgiref
+

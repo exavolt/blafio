@@ -27,9 +27,10 @@ import tornado.ioloop
 from tornado.options import define, options
 
 
-define("host", default="127.0.0.1", help="Listen to the specified host")
-define("port", default=11002, help="Run on the given port", type=int)
+define("config", default=None, help="Config file name to load")
 define("daemon", default=False, help="Run as daemon", type=bool)
+define("host", default="", help="Listen to the specified host")
+define("port", default=11002, help="Run on the given port", type=int)
 define("db_name", default="blafio", help="DB Name")
 define("db_host", default=None, help="DB server address")
 define("db_port", default=None, help="DB server port", type=int)
@@ -84,6 +85,19 @@ def run(pidfile=None):
 
 def main():
     tornado.options.parse_command_line()
+    if options.config:
+        tornado.options.parse_config_file(options.config)
+        # Parse the command line again to check the overrides
+        tornado.options.parse_command_line()
+    else:
+        try:
+            tornado.options.parse_config_file("./config.py")
+            # Parse the command line again to check the overrides
+            tornado.options.parse_command_line()
+        except IOError:
+            pass
+        except:
+            raise
     if options.daemon:
         # Capture stdout/err in logfile
         log_fname = '/tmp/blafioapi-%s.log' % options.port
