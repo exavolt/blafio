@@ -26,6 +26,40 @@ opt("db_pwd", default=None, help=
 
 
 if __name__ == "__main__":
-    #TODO: Generate template with docs
-    pass
+    import sys
+    from tornado.options import options
+    ignored_options = ['help', 'config']
+    outf = sys.stdout
+    by_file = {}
+    for option in options.itervalues():
+        by_file.setdefault(option.file_name, []).append(option)
+    print >> outf, """\
+# All the rules in this config is the same with the command line options.
+# The options available could be found out by passing `--help` to the main.py
+"""
+    print >> outf, "#- buit-in options -\n"
+    for filename, o in sorted(by_file.items()):
+        if filename: print >> outf, "\n#- " + filename + " -\n"
+        o.sort(key=lambda option: option.name)
+        for option in o:
+            if option.name in ignored_options:
+                continue
+            prefix = option.name
+            suffix = ""
+            if option.metavar:
+                suffix = " # " + option.metavar
+            if option.value() is None:
+                print >> outf, "%s = None %s" % (prefix, suffix)
+            elif option.type in [str, unicode]:
+                #TODO: escape unicode
+                print >> outf, "%s = \"%s\" %s" % (prefix, 
+                    option.value() or "", suffix)
+            elif option.type == bool:
+                print >> outf, "%s = %s %s" % (prefix, 
+                    "True" if option.value() else "False", suffix)
+            else:
+                print >> outf, "%s = %s %s" % (prefix, 
+                    option.value() or "", suffix)
+    print >> outf, "\n"
+    
 
