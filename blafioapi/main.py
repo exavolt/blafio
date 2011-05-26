@@ -23,29 +23,13 @@ import mongoengine
 import tornado.httpserver
 import tornado.web
 import tornado.ioloop
+import tornado.options
+from tornado.options import options
 
-from tornado.options import define, options
-
-
-define("config", default=None, help="Config file name to load")
-define("daemon", default=False, help="Run as daemon", type=bool)
-define("host", default="", help="Listen to the specified host")
-define("port", default=11002, help="Run on the given port", type=int)
-define("db_name", default="blafio", help="DB Name")
-define("db_host", default=None, help="DB server address")
-define("db_port", default=None, help="DB server port", type=int)
-define("db_usr", default=None, help="DB username")
-define("db_pwd", default=None, help="DB password")
+import opts # Application's options
 
 
-def run(pidfile=None):
-    mongoengine.connect(options.db_name,
-        host=options.db_host,
-        port=options.db_port,
-        username=options.db_usr,
-        password=options.db_pwd
-        )
-    
+def setup_application():
     handlers = [
         (r"/1.0/home/stream/([A-Za-z0-9_]+).json", me.HomeStreamHandler),
         (r"/1.0/me/stream/([A-Za-z0-9_]+).json", me.SelfStreamHandler),
@@ -61,11 +45,20 @@ def run(pidfile=None):
         (r"/1.0/__admin_hore/app_access.json", admin.AppAccessHandler),
         ]
     settings = dict()
-    
     application = tornado.web.Application(handlers, **settings)
     #application = soulbox.web.Middleware(application)
+    return application
+
+
+def run(pidfile=None):
+    mongoengine.connect(options.db_name,
+        host=options.db_host,
+        port=options.db_port,
+        username=options.db_usr,
+        password=options.db_pwd
+        )
     
-    http_server = tornado.httpserver.HTTPServer(application)
+    http_server = tornado.httpserver.HTTPServer(setup_application())
     http_server.listen(options.port, address=options.host)
     logging.info("Listening at %s:%i..." % (options.host, options.port))
     

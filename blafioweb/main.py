@@ -21,19 +21,25 @@ import mongoengine
 import tornado.httpserver
 import tornado.web
 import tornado.ioloop
+import tornado.options
+from tornado.options import options
 
-from tornado.options import define, options
+import opts # Application's options
 
 
-define("config", default=None, help="Config file name to load")
-define("daemon", default=False, help="Run as daemon", type=bool)
-define("host", default="", help="Listen to the specified host")
-define("port", default=11001, help="Run on the given port", type=int)
-define("db_name", default="blafio", help="DB Name")
-define("db_host", default=None, help="DB server address")
-define("db_port", default=None, help="DB server port", type=int)
-define("db_usr", default=None, help="DB username")
-define("db_pwd", default=None, help="DB password")
+def setup_application():
+    handlers = [
+        (r"/", index.ViewHandler),
+        (r"/stream", stream.ViewHandler),
+        (r"/u/([A-Za-z0-9_]+)", user.Handler),
+        ]
+    settings = dict(
+        static_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), 
+            "static"),
+        )
+    application = tornado.web.Application(handlers, **settings)
+    #application = soulbox.web.Middleware(application)
+    return application
 
 
 def run(pidfile=None):
@@ -44,20 +50,7 @@ def run(pidfile=None):
         password=options.db_pwd
         )
     
-    handlers = [
-        (r"/", index.ViewHandler),
-        (r"/stream", stream.ViewHandler),
-        (r"/u/([A-Za-z0-9_]+)", user.Handler),
-        ]
-    settings = dict(
-        static_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), 
-            "static"),
-        )
-    
-    application = tornado.web.Application(handlers, **settings)
-    #application = soulbox.web.Middleware(application)
-    
-    http_server = tornado.httpserver.HTTPServer(application)
+    http_server = tornado.httpserver.HTTPServer(setup_application())
     http_server.listen(options.port, address=options.host)
     logging.info("Listening at %s:%i..." % (options.host, options.port))
     
