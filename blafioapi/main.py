@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-#NOTE: Use ctl.py for serving this as daemon
-
 import os.path
 import sys
 
@@ -99,12 +97,11 @@ def main():
         pidfile = '/tmp/blafioapi-%s.pid' % options.port
         pid.check(pidfile)
         # Daemonize
-        daemon_context = daemon.DaemonContext(
+        with daemon.DaemonContext(
             stdout=log_file, 
             stderr=log_file, 
             working_directory='.'
-            )
-        with daemon_context:
+            ):
             run(pidfile)
     else:
         try:
